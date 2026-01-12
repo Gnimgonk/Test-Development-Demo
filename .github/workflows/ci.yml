@@ -37,6 +37,7 @@ jobs:
     
     - name: Generate test report
       run: |
+        mkdir -p reports
         pytest --html=reports/report.html --self-contained-html -v
       continue-on-error: true
     
@@ -46,3 +47,4 @@ jobs:
       with:
         name: test-report-${{ matrix.python-version }}
         path: reports/report.html
+        if-no-files-found: warn
