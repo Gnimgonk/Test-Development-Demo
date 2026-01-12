@@ -5,6 +5,7 @@ AI模型客户端封装
 from typing import Dict, List, Any
 import time
 import random
+import concurrent.futures
 
 
 class AIModelClient:
@@ -67,6 +68,13 @@ class AIModelClient:
         time.sleep(random.uniform(0.1, 0.3))
         self.call_count += 1
         
+        if not categories: 
+            return {
+                "text": text,
+                "error": "分类列表不能为空",
+                "model": self.model_name
+            }
+
         # 模拟分类逻辑
         category_scores = {}
         for category in categories:
@@ -83,7 +91,7 @@ class AIModelClient:
     
     def batch_process(self, texts: List[str], operation: str = "sentiment") -> List[Dict[str, Any]]:
         """
-        批量处理
+        顺序批量处理
         
         Args:
             texts: 文本列表
@@ -100,7 +108,26 @@ class AIModelClient:
                 result = {"text": text, "error": "Unknown operation"}
             results.append(result)
         return results
-    
+
+    def concurrent_batch_process(self, texts: List[str], operation: str = "sentiment") -> List[Dict[str, Any]]:
+        """
+        并发批量处理
+
+        Args:
+            texts: 文本列表
+            operation: 操作类型
+        
+        Returns:
+            处理结果列表
+        """
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(texts)) as executor:
+            futures = [
+                executor.submit(self.sentiment_analysis, text) 
+                for text in texts
+                ]
+            results = [future.result() for future in concurrent.futures.as_completed(futures)]
+        return results
+
     def get_model_info(self) -> Dict[str, Any]:
         """获取模型信息"""
         return {

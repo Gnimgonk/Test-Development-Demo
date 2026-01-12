@@ -49,8 +49,10 @@ class TestTextClassification:
         categories = []
         
         result = model_client.text_classification(text, categories)
-        assert "category_scores" in result
-        assert len(result["category_scores"]) == 0
+        assert "error" in result
+        assert result["error"] == "分类列表不能为空"
+        # assert "category_scores" in result
+        # assert len(result["category_scores"]) == 0
     
     def test_model_info(self, model_client):
         """测试模型信息"""

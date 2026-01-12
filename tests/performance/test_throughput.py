@@ -20,6 +20,7 @@ class TestThroughput:
         """测试前置准备"""
         # self.client = AIModelClient()
         self.min_throughput = 10  # 最小吞吐量（请求/秒）
+        # self.min_throughput = 2   
     
     def test_sequential_throughput(self, model_client):
         """测试顺序处理的吞吐量"""
@@ -56,14 +57,9 @@ class TestThroughput:
         
         
         texts = ["测试文本"] * 20
-        max_workers = 5
+        
         start_time = time.time()
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = [
-                executor.submit(model_client.sentiment_analysis, text) 
-                for text in texts
-            ]
-            results = [future.result() for future in concurrent.futures.as_completed(futures)]
+        results = model_client.concurrent_batch_process(texts, operation="sentiment")
         end_time = time.time()
         
         total_time = end_time - start_time
